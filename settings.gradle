@@ -1,0 +1,5 @@
+rootProject.name = "dummy-project"
+
+include "api"
+include "service"
+include "deployment"

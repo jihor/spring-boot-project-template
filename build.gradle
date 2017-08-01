@@ -1,0 +1,88 @@
+ext {
+	buildNumber = System.getProperty("build", "")?.take(6) ?: "latest"
+	isRelease = System.getProperty("isRelease", "false").toBoolean()
+	releaseVersion = "1.0"
+	artifactVersion = "$releaseVersion" + (isRelease ? ".$buildNumber" : "-SNAPSHOT")
+}
+
+repositories {
+	mavenCentral()
+}
+
+configurations {
+	// dependencies defined for this configuration will be loaded by the Gradle's daemon JVM Groovy classloader
+	gradleGroovyClasspath
+}
+
+def mariaDbDriverVersion = "2.0.3"
+
+dependencies {
+	gradleGroovyClasspath "org.mariadb.jdbc:mariadb-java-client:$mariaDbDriverVersion"
+}
+
+configurations.gradleGroovyClasspath.each { File file ->
+	((URLClassLoader) MetaClass.class.classLoader).addURL(file.toURI().toURL())
+}
+
+buildscript {
+	ext {
+		springBootVersion = '1.5.6.RELEASE'
+	}
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+	}
+}
+
+subprojects {
+	def springBomVersion = "Brussels-SR2"
+	def springCloudVersion = "Dalston.RELEASE"
+	def dsaLoggingVersion = "1.2.3"
+	def dsaCachingVersion = "1.0.9"
+	def logbackVersion = "1.2.3"
+
+	apply plugin: "java"
+	apply plugin: "io.spring.dependency-management"
+	apply plugin: "maven"
+
+	repositories {
+		mavenCentral()
+	}
+
+	dependencyManagement {
+		imports {
+			mavenBom "io.spring.platform:platform-bom:${springBomVersion}"
+			mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+		}
+
+		dependencies {
+			dependency "org.projectlombok:lombok:1.16.18"
+
+			dependency "ru.rgs.logging:logging:${dsaLoggingVersion}"
+			dependency "ru.rgs.logging:logging-core:${dsaLoggingVersion}"
+			dependency "ru.rgs.logging:logging-test-inmemory-core:${dsaLoggingVersion}"
+			dependency "ru.rgs.logging:logging-test-inmemory-logback:${dsaLoggingVersion}"
+			dependency "ru.rgs.logging:splunk-logging-log4j2:${dsaLoggingVersion}"
+			dependency "ru.rgs.logging:splunk-logging-logback:${dsaLoggingVersion}"
+			dependency "ru.rgs:commons-caching:${dsaCachingVersion}"
+
+			dependency "org.mariadb.jdbc:mariadb-java-client:${mariaDbDriverVersion}"
+
+			dependency "ch.qos.logback:logback-classic:${logbackVersion}"
+			dependency "ch.qos.logback:logback-core:${logbackVersion}"
+			dependency "org.slf4j:jcl-over-slf4j:1.7.25"
+
+			dependency "org.apache.commons:commons-lang3:3.5"
+			dependency "commons-codec:commons-codec:1.10"
+			dependency "commons-io:commons-io:2.5"
+		}
+	}
+
+	dependencies {
+		compileOnly "org.projectlombok:lombok" // compilation-level, non-transitive
+		testCompile "org.projectlombok:lombok" // test-only
+	}
+
+}

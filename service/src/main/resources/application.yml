@@ -1,0 +1,4 @@
+dummy:
+    simpleMsg: "Not much to say about him"
+    inner:
+        happyBirthdayMsg: "He has a birthday today"
