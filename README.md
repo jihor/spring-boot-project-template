@@ -1,4 +1,4 @@
-# spring-boot-dummy-project
+# spring-boot-project-template
 Dummy Spring Boot project for use as a reference when creating new Spring Boot application projects.
 
 Build command is `./gradlew -i clean build`
